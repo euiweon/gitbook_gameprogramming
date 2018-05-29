@@ -7,3 +7,6 @@
 
 
 내용
+
+- [리눅스 안드로이드 설정하기](android/linux_android_setting.md)
+- 
