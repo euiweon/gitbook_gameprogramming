@@ -17,6 +17,7 @@
 하는 방법은 
 
 - app/build.gradle 과  global.properties , Applycation.mk  Android.mk  파일만 수정하면 된다.
+- SDK 폴더에  NDK 가 ndk-bundle 폴더에 설치되어 있어야 된다.
 
 일단  global.properties
 
