@@ -36,7 +36,7 @@ app/build.gradle
 	// defaultConfig 하위에 추가 
         externalNativeBuild {
             ndkBuild {
-                targets 'Dodonpachi'
+                targets 'MyGame'
                 arguments 'NDK_TOOLCHAIN_VERSION=clang'
                 arguments '-j' + Runtime.runtime.availableProcessors()
             }
