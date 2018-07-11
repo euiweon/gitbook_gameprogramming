@@ -21,11 +21,11 @@
 일단  global.properties
 
 ```python
-PROP_APP_ABI=armeabi
+PROP_APP_ABI=armeabi # 여긴 적당히 수정해도 된다. 
 
 PROP_BUILD_TYPE=ndk-build
 
-android.enableAapt2=false   # only gradle 3.0 이후로 적용
+android.enableAapt2=false   # only gradle 3.0 이후로 적용... 최근 버전에서는 필요 없어졌기에 2018년 이후로 폐기 될 예정...
 ```
 
 
