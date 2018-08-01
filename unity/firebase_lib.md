@@ -19,7 +19,7 @@ maven -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true
 
 https://www.lesstif.com/pages/viewpage.action?pageId=7635187
 
-- 아래와 같이 수정해본다. Https 는 쓰지 말것.
+- Asset/Firebase/Editor/AppDendencies.xml 아래와 같이 수정해본다. Https 는 쓰지 말것. (이게 해결 방법)
 
 ```xml
     <androidPackage spec="com.google.firebase:firebase-core:16.0.1">
