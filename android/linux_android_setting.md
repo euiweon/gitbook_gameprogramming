@@ -4,7 +4,7 @@
 
 안드로이드 sdk 설치 ...
 
-```shell
+```bash
 
 $ apt-get update
 $ apt-get install default-jdk
