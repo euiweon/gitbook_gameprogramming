@@ -1,4 +1,4 @@
-#### Cocos2D-X Jenkins로 빌드하기  
+# Cocos2D-x Jenkins 로 빌드 자동화 하기
 
 * 선행 작업으로 안드로이드 스튜디오에서 NDK빌드 하기를 해줘야 함
 * 
