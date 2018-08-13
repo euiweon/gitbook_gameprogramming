@@ -19,15 +19,34 @@ maven -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true
 
 https://www.lesstif.com/pages/viewpage.action?pageId=7635187
 
-- Asset/Firebase/Editor/AppDendencies.xml 아래와 같이 수정해본다. Https 는 쓰지 말것. (이게 해결 방법)
+- Asset/Firebase/Editor/AppDendencies.xml 아래와 같이 수정해본다. Https 는 쓰지 말것. (이게 해결 방법1)
 
 ```xml
     <androidPackage spec="com.google.firebase:firebase-core:16.0.1">
       <repositories>
         <repository>http://maven.google.com</repository>
+        <repository>http://jcenter.bintray.com</repository>
+        <repository>http://repo.maven.apache.org/maven2</repository>
       </repositories>
     </androidPackage>
 ```
 
+구글만으로 부족할수 있으니 Jcenter와 MavenCentral의 주소도 추가 시켜준다. 
 
 
+
+- 위 방법으로 해결이 안될 경우, 일단 집에서는 정상적으로 받아진다고 했으므로, 관련 파일을 모조리 받아서 m2repository에 넣어준뒤 로컬 경로로 변경해준다. (해결방법 2)
+
+```xml
+    <androidPackage spec="com.google.firebase:firebase-core:16.0.1">
+      <repositories>
+        <repository>Assets/Plugin/....</repository>
+      </repositories>
+    </androidPackage>
+```
+
+- 위 방법도 안 될경우에는 별수 없이 
+
+  https://github.com/googlesamples/unity-jar-resolver
+
+  에 가서 Dll 파일 지우고 소스코드로 안 받아지는 파일들 디버깅 해보자. (해결방법 3)
