@@ -19,4 +19,5 @@
   * [Cocos2D-x 안드로이드 스튜디오에서 NDK 빌드하기](part_cocos2d-x/androidstduio_ndk_build_version_up.md)
   * [Cocos2D-x 안드로이드에서 ogg/vorbis 관련 라이브러리 교체하기](part_cocos2d-x/android_cocos2d_ogg_lib.md)
   * [Cocos2D-x Jenkins 로 빌드 자동화 하기](part_cocos2d-x/jenkins_build.md)
+* [Interview](interview.md)
 
