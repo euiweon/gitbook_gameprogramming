@@ -152,27 +152,48 @@ AAAObject = BBBObject;
 ##### cocos2d-x의 사용 디자인 패턴 
 
 ### **프로토타입**
+#### 원형이 되는 인스턴스를 사용하여 생성할 객체의 종류를 명시하고, 이렇게 만든 견본을 복사해서 새로운 객체를 생성합니다. (GoF의 디자인 패턴 169p)
+- 인스턴스를 복제하여 사용하는 구조
+- 생성할 객체들의 타입이 프로토타입 인스턴스로부터 결정되도록 하는 디자인 패턴
+- 인스턴스는 새 객체를 만들기 위해 자신을 복제(clone)한다.
 ![Prototype](https://dzone.com/storage/temp/8861139-prototype-1.png)
 
 ### **Flyweight**
+- 동일한 것을 공유하여 사용하는 구조
+- 동일한 것을 공유하여 메모리 사용량을 줄임
+- 가능한 많은 데이터를 서로 공유하여 사용하도록 하여 메모리 사용량을 최소화하는 디자인 패턴
 ![Flyweight](https://dzone.com/storage/temp/8861142-flyweight-1.png)
 
 ### **Bridge**
-
+- 기능 계층과 구현 계층이 분리된 구조
+- 구현부에서 추상층을 분리하여 각자 독립적으로 변형할 수 있게 하는 패턴
 ![Bridge](https://dzone.com/storage/temp/8515490-bridge-1.png )
 ![Bridge](https://dzone.com/storage/temp/8515491-bridge-2.png)
 
 ### **Composite**
+- "그릇과 내용물을 동일시하기"
+- 객체들의 관계를 트리 구조로 구성하여 부분-전체 계층을 표현하는 패턴
+- 단일 객체와 복합 객체를 동일하게 다룰 수 있음
 ![Composite](https://dzone.com/storage/temp/8861156-composite-1.png )
 ![Composite](https://dzone.com/storage/temp/8861152-composite-2.png)
 
 ### **Command**
+- 명령을 클래스로 표현하는 구조
+- 요청을 객체의 형태로 캡슐화하는 디자인 패턴
+- 서로 요청이 다른 사용자의 매개변수, 요청 저장, 로깅, 연산 취소를 지원함
 ![Command](https://dzone.com/storage/temp/8861153-command-1.png)
 
 ### **Observer**
+- 상태 변화를 알려주도록 하는 패턴
+- 이벤트 핸들링 시스템 구현에 활용됨
+- 어떤 일이 생기면 미리 등록한 객체들에게 통보해주는 패턴
+- 옵저버들을 등록해두어 상태변화가 있을 때 통지받는 패턴
+- 객체의 상태 변화를 관찰하는 관찰자들의 목록을 객체에 등록하여 상태 변화가 있을 때마다 메소드 등을 통해 객체가 각 Observer에게 통지하도록 하는 디자인 패턴
+- 발행-구독 모델을 따르는 디자인 패턴
 ![Observer](https://dzone.com/storage/temp/8861167-observer-1.png )
 
 ### **Component**
+- 한 개체가 여러 분야를 서로 커플링 없이 다룰 수 있게 한다.
 ![Component](https://dzone.com/storage/temp/8861155-component-1.png )
 
 
