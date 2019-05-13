@@ -1,4 +1,5 @@
 
+
 ###  질문
 
 
@@ -26,9 +27,7 @@ a.__data 는 nullptr 상태이기 때문에 문제가 생깁니다.
 즉, std::move() 를 사용할 수 있는 경우는 a를 더이상 사용 안해야 합니다.
 ```
 
-```cpp
 
-```
 
 ##### C++ 11에서 주로 써본것
 
@@ -151,7 +150,32 @@ AAAObject = BBBObject;
 #####  어떤 애니메이션에 관련되어서 SpriteSheet를 사용하는것이 이득인지 Image를 사용하는것이 이득인지 설명하시오
 ##### cocos2d-x 메모리 관리 방법
 ##### cocos2d-x의 사용 디자인 패턴 
- - https://dzone.com/articles/design-patterns-in-cocos2d-x 
+
+### **프로토타입**
+![Prototype](https://dzone.com/storage/temp/8861139-prototype-1.png)
+
+### **Flyweight**
+![Flyweight](https://dzone.com/storage/temp/8861142-flyweight-1.png)
+
+### **Bridge**
+
+![Bridge](https://dzone.com/storage/temp/8515490-bridge-1.png )
+![Bridge](https://dzone.com/storage/temp/8515491-bridge-2.png)
+
+### **Composite**
+![Composite](https://dzone.com/storage/temp/8861156-composite-1.png )
+![Composite](https://dzone.com/storage/temp/8861152-composite-2.png)
+
+### **Command**
+![Command](https://dzone.com/storage/temp/8861153-command-1.png)
+
+### **Observer**
+![Observer](https://dzone.com/storage/temp/8861167-observer-1.png )
+
+### **Component**
+![Component](https://dzone.com/storage/temp/8861155-component-1.png )
+
+
 
 ##### 다른 해상도 / 스크린 / 크기 비율로 처리 방법
 ##### 백그라운드에서 무거운 작업을 수행하고 UI에 결과를 표시하는 방법?
