@@ -270,3 +270,425 @@ public:
 #define SCROLL_ADD		83
 #define SCROLL_GAP		5
 ```
+
+// 웹 API 연결
+```cpp
+#pragma once
+
+
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
+#include <windows.h>
+#endif 
+
+namespace Test
+{
+	// h
+    class NetworkManager : public Test::Singleton<NetworkManager>
+    {
+    public:
+        NetworkManager();
+        ~NetworkManager();
+
+        void init();
+
+        void SendHttpPacketCore(std::string strPath, std::string strData, network::HttpRequest::Type eType,
+            std::function<void(cocos2d::network::HttpClient* client, cocos2d::network::HttpResponse* response)> funcCallback, bool encrypt = false);
+
+
+        void SendHttpPacket(std::string strPath, std::string strData, network::HttpRequest::Type eType,
+            std::function<void(int, std::string)> callback, bool encrypt);
+        // get의 경우는 mapdata를 주소로 변환 하고 나머지는 json으로 변환(자식구조는 불가능)
+        void SendHttpPacket(std::string strPath, std::map<std::string, std::string> mapData, network::HttpRequest::Type eType,
+            std::function<void(int, std::string)> callback, bool encrypt = true);
+
+        /////////////////////////////////////////////////////////////////
+        // Facebook Rest API 연결 함수 
+        // 기존 Rest API코드와 동일하지만, 약간의 수정이 있어서 별도로 분리 해놓음. 
+        // 나중에 합치기를... 
+        void SendHttpPacketFB(std::string strAddpath, std::map<std::string, std::string> mapData, network::HttpRequest::Type eType,
+            std::function<void(int, std::string)> callback);
+
+        void SendHttpPacketFB(std::string strPath, std::string strData, network::HttpRequest::Type eType,
+            std::function<void(int, std::string)> callback);
+
+        void SendHttpPacketCoreFB(std::string strPath, std::string strData, network::HttpRequest::Type eType,
+            std::function<void(cocos2d::network::HttpClient* client, cocos2d::network::HttpResponse* response)> funcCallback);
+    private:
+        void update(float dt);
+    protected:
+        A_SYNTHESIZE(std::string, LastErrorMessage);
+        A_SYNTHESIZE(bool, Disconnect);
+        A_SYNTHESIZE(int64_t, NetworkUserID);
+    };
+
+	// cpp 
+	NetworkManager::NetworkManager()
+    {
+
+    }
+
+
+    NetworkManager::~NetworkManager()
+    {
+
+    }
+
+
+    void    NetworkManager::init()
+    {
+#if (CC_TARGET_PLATFORM != CC_PLATFORM_WINRT)
+        network::HttpClient::getInstance()->setTimeoutForConnect(15);
+#endif 
+        m_LastErrorMessage = "";
+        m_Disconnect = false;
+        m_NetworkUserID = -1;
+    }
+
+
+    void NetworkManager::update(float dt)
+    {
+    }
+
+    void  NetworkManager::SendHttpPacketCore(std::string strPath, std::string strData, network::HttpRequest::Type eType,
+        std::function<void(cocos2d::network::HttpClient* client, cocos2d::network::HttpResponse* response)> funcCallback, bool encrypt)
+    {
+
+        
+        network::HttpRequest* request = new network::HttpRequest();
+        
+        if (m_NetworkUserID == -1)
+        {
+            auto pResponse = new cocos2d::network::HttpResponse(request);
+            pResponse->setResponseCode(404);
+            if (encrypt)
+            {
+                std::string strSendData = "not found networkID";
+                strSendData = encrypt_server_base64(strData.c_str());
+                pResponse->setResponseDataString(strSendData.c_str(), strlen(strSendData.c_str()));
+            }
+            else
+            {
+                pResponse->setResponseDataString("not found networkID", strlen("not found networkID"));
+            }
+            
+            funcCallback(network::HttpClient::getInstance(), pResponse);
+            request->release();
+            return;
+        }
+        else if (m_Disconnect)
+        {
+            auto pResponse = new cocos2d::network::HttpResponse(request);
+            pResponse->setResponseCode(404);
+            if (encrypt)
+            {
+                std::string strSendData = "Not Connect";
+                strSendData = encrypt_server_base64(strData.c_str());
+                pResponse->setResponseDataString(strSendData.c_str(), strlen(strSendData.c_str()));
+            }
+            else
+            {
+                pResponse->setResponseDataString("Not Connect", strlen("Not Connect"));
+            }
+           
+            funcCallback(network::HttpClient::getInstance(), pResponse);
+            request->release();
+            return;
+        }
+
+
+        request->setUrl(strPath.c_str());
+        request->setRequestType(eType);
+        request->setResponseCallback(funcCallback);
+
+        std::vector<std::string> headers;
+
+
+        headers.push_back("content-type: application/json");
+
+        if (eType != network::HttpRequest::Type::GET)
+        {
+            request->setRequestData(strData.c_str(), strData.length());
+        }
+
+        request->setHeaders(headers);
+
+        network::HttpClient::getInstance()->send(request);
+        request->release();
+    }
+
+
+    void  NetworkManager::SendHttpPacket(std::string strPath, std::string strData, network::HttpRequest::Type eType,
+        std::function<void(int, std::string)> callback, bool encrypt)
+    {
+        
+        std::string strSendData = strData;
+        if (encrypt)
+            strSendData = encrypt_server_base64(strData.c_str());
+
+        SendHttpPacketCore(strPath, strSendData, eType, [&, strPath, eType, strData, callback, encrypt]
+                                (cocos2d::network::HttpClient* client, cocos2d::network::HttpResponse* pResponse)
+        {
+
+            std::string strResponseEncryptData = std::string(pResponse->getResponseData()->begin(), pResponse->getResponseData()->end());
+
+            std::string strResponseData = "";
+
+            if (encrypt)
+                strResponseData = (char *)decrypt_server_base64(strResponseEncryptData.c_str(), (int)strResponseEncryptData.length());
+            else
+                strResponseData = strResponseEncryptData;
+            
+           
+            if (pResponse->getResponseCode() / 100 >= 4)
+            {
+                SetDisconnect(true);
+                m_NetworkUserID = -1; 
+            }
+
+
+
+           
+            
+
+            // Header Test
+            {
+                std::string strHeader(pResponse->getResponseHeader()->begin(), pResponse->getResponseHeader()->end());
+                std::unordered_map<std::string, std::string>  mapHeader;
+                std::string strHeader1 = strHeader;
+                int     nCutPos;
+                int     nIndex = 0;
+                std::vector<std::string> headers; 
+                while ((nCutPos = strHeader1.find_first_of("\r\n")) != strHeader1.npos)
+                {
+                    if (nCutPos > 0)
+                    {
+                        headers.push_back(strHeader1.substr(0, nCutPos));
+                    }
+                    strHeader1 = strHeader1.substr(nCutPos + 1);
+                }
+                for (auto header : headers)
+                {
+                    std::string key = header.substr(0, header.find_first_of(':'));
+                    std::string value = header.substr(header.find_first_of(':') + 1, header.size() - 1);
+
+                    if (mapHeader.find(key) == mapHeader.end())
+                        mapHeader.insert(std::make_pair(key, value));
+                }
+            }
+
+            switch (eType)
+            {
+            case cocos2d::network::HttpRequest::Type::GET:
+                CCLOG("ResultCode : %d\nURL : %s\nType : GET\nResult : %s", (int)pResponse->getResponseCode(), strPath.c_str(), strResponseData.c_str());
+                break;
+            case cocos2d::network::HttpRequest::Type::POST:
+                CCLOG("ResultCode : %d\nURL : %s\nType : POST\nResult : %s", (int)pResponse->getResponseCode(), strPath.c_str(), strResponseData.c_str());
+                break;
+            case cocos2d::network::HttpRequest::Type::PUT:
+                CCLOG("ResultCode : %d\nURL : %s\nData : %s\nType : PUT\nResult : %s", (int)pResponse->getResponseCode(), strPath.c_str(),
+                    strData.c_str(), strResponseData.c_str());
+                break;
+            case cocos2d::network::HttpRequest::Type::DELETE:
+                CCLOG("ResultCode : %d\nURL : %s\nType : DELETE\nResult : %s", (int)pResponse->getResponseCode(), strPath.c_str(), strResponseData.c_str());
+                break;
+            case cocos2d::network::HttpRequest::Type::UNKNOWN:
+                CCLOG("ResultCode : %d\nURL : %s\nType : UNKNOWN\nResult : %s", (int)pResponse->getResponseCode(), strPath.c_str(), strResponseData.c_str());
+                break;
+            default:
+                break;
+            }
+
+            callback(pResponse->getResponseCode(), strResponseData);
+        }, encrypt);
+    }
+
+
+    void NetworkManager::SendHttpPacket(std::string strPath, std::map<std::string, std::string> mapData, network::HttpRequest::Type eType,
+        std::function<void(int, std::string)> callback, bool encrypt)
+    {
+        if (eType == cocos2d::network::HttpRequest::Type::GET)
+        {
+
+            bool bFirst = true;
+            std::string outData;
+            for (auto& ref : mapData)
+            {
+                if (bFirst)
+                {
+                    bFirst = false;
+                    outData += "?";
+                }
+                else
+                {
+                    outData += "&";
+                }
+                outData += ref.first + "=" + ref.second;
+            }
+
+            SendHttpPacket(strPath + outData, "", eType, callback, encrypt);
+
+        }
+        else
+        {
+
+            Json::Value root;
+            Json::Value encoding;
+            for (auto& ref : mapData)
+            {
+                root[ref.first] = ref.second;
+            }
+
+            Json::StyledWriter writer;
+            std::string outputData = writer.write(root);
+
+            SendHttpPacket(strPath, outputData.c_str(), eType, callback, encrypt);
+
+            CCLOG("Send : %s", outputData.c_str());
+
+        }
+    }
+
+    /////////////////////////////////////////////////////////////////
+
+    void NetworkManager::SendHttpPacketFB(std::string strAddpath, std::map<std::string, std::string> mapData, network::HttpRequest::Type eType,
+        std::function<void(int, std::string)> callback)
+    {
+
+        /////////////////////////////////////////////////////////////////
+        // FB 연결 관련 내용... 
+        std::string strPath = "https://graph.facebook.com/v2.8" + strAddpath;
+
+        if (!APPMANAGER().IsFacebookLogin())
+        {
+            callback(1000, "Not Login or Token expired");
+            return;
+        }
+        std::string strUserToken = "";
+        strUserToken = PluginXManager::GetSingleton().sendPluginFunctionWrapString("PluginFB", "GetAccessToken");
+        mapData.insert(std::make_pair("access_token", strUserToken.c_str()));
+        /////////////////////////////////////////////////////////////////
+
+        if (eType == cocos2d::network::HttpRequest::Type::GET ||
+            eType == cocos2d::network::HttpRequest::Type::DELETE)
+        {
+
+            bool bFirst = true;
+            std::string outData;
+            for (auto& ref : mapData)
+            {
+                if (bFirst)
+                {
+                    bFirst = false;
+                    outData += "?";
+                }
+                else
+                {
+                    outData += "&";
+                }
+                outData += ref.first + "=" + ref.second;
+            }
+
+            SendHttpPacketFB(strPath + outData, "", eType, callback);
+
+        }
+        else
+        {
+
+            Json::Value root;
+            Json::Value encoding;
+            for (auto& ref : mapData)
+            {
+                root[ref.first] = ref.second;
+            }
+
+            Json::StyledWriter writer;
+            std::string outputData = writer.write(root);
+
+            SendHttpPacketFB(strPath, outputData.c_str(), eType, callback);
+
+            CCLOG("%s", outputData.c_str());
+
+        }
+    }
+
+
+
+    void  NetworkManager::SendHttpPacketFB(std::string strPath, std::string strData, network::HttpRequest::Type eType,
+        std::function<void(int, std::string)> callback)
+    {
+        SendHttpPacketCoreFB(strPath, strData, eType, [&, strPath, eType, strData, callback](cocos2d::network::HttpClient* client, cocos2d::network::HttpResponse* pResponse)
+        {
+            std::string strResponseData = std::string(pResponse->getResponseData()->begin(), pResponse->getResponseData()->end());
+
+
+            if (pResponse->getResponseCode() / 100 >= 4)
+            {
+                SetDisconnect(true);
+            }
+
+            switch (eType)
+            {
+            case cocos2d::network::HttpRequest::Type::GET:
+                CCLOG("ResultCode : %d\nURL : %s\nType : GET\nResult : %s", (int)pResponse->getResponseCode(), strPath.c_str(), strResponseData.c_str());
+                break;
+            case cocos2d::network::HttpRequest::Type::POST:
+                CCLOG("ResultCode : %d\nURL : %s\nType : POST\nResult : %s", (int)pResponse->getResponseCode(), strPath.c_str(), strResponseData.c_str());
+                break;
+            case cocos2d::network::HttpRequest::Type::PUT:
+                CCLOG("ResultCode : %d\nURL : %s\nData : %s\nType : PUT\nResult : %s", (int)pResponse->getResponseCode(), strPath.c_str(),
+                    strData.c_str(), strResponseData.c_str());
+                break;
+            case cocos2d::network::HttpRequest::Type::DELETE:
+                CCLOG("ResultCode : %d\nURL : %s\nType : DELETE\nResult : %s", (int)pResponse->getResponseCode(), strPath.c_str(), strResponseData.c_str());
+                break;
+            case cocos2d::network::HttpRequest::Type::UNKNOWN:
+                CCLOG("ResultCode : %d\nURL : %s\nType : UNKNOWN\nResult : %s", (int)pResponse->getResponseCode(), strPath.c_str(), strResponseData.c_str());
+                break;
+            default:
+                break;
+            }
+
+            callback(pResponse->getResponseCode(), strResponseData);
+        });
+    }
+
+
+    void  NetworkManager::SendHttpPacketCoreFB(std::string strPath, std::string strData, network::HttpRequest::Type eType,
+        std::function<void(cocos2d::network::HttpClient* client, cocos2d::network::HttpResponse* response)> funcCallback)
+    {
+        network::HttpRequest* request = new network::HttpRequest();
+
+        if (m_Disconnect)
+        {
+            auto pResponse = new cocos2d::network::HttpResponse(request);
+            pResponse->setResponseCode(404);
+            pResponse->setResponseDataString("Not Connect", strlen("Not Connect"));
+            funcCallback(network::HttpClient::getInstance(), pResponse);
+            request->release();
+            return;
+        }
+
+        request->setUrl(strPath.c_str());
+        request->setRequestType(eType);
+        request->setResponseCallback(funcCallback);
+
+        std::vector<std::string> headers;
+
+        //headers.push_back("Content-Type: application/json");
+        //headers.push_back("charset=utf-8");
+
+
+        if (eType != network::HttpRequest::Type::GET)
+        {
+            request->setRequestData(strData.c_str(), strData.length());
+        }
+
+        request->setHeaders(headers);
+
+
+        network::HttpClient::getInstance()->send(request);
+        request->release();
+    }
+
+}
+```
