@@ -1,6 +1,6 @@
-cocos2d-x 샘플 코드 모아두기 
+### cocos2d-x 샘플 코드 모아두기 
 
-UI::ImageView  사용. ( 무한루핑되는 애니메이션도 추가)
+#### UI::ImageView  사용. ( 무한루핑되는 애니메이션도 추가)
 ```cpp
 auto pTouch = ui::ImageView::create("touchthescreen.png");
 pTouch->setAnchorPoint(Vec2(0, 0));
@@ -10,7 +10,7 @@ pTouch->runAction(RepeatForever::create(
 Sequence::create(FadeIn::create(0.3f), DelayTime::create(1.2f), FadeOut::create(0.3f), DelayTime::create(0.2f), nullptr)));
 GetBaseNode()->addChild(pTouch);
 ```
-ui::Button 사용법 (터치 이벤트는 별도로... )
+#### ui::Button 사용법 (터치 이벤트는 별도로... )
 ``` cpp
 auto pCloseButton = ui::Button::create("pop1.png");
 pCloseButton->setPosition(Vec2(m_pPopupNode->getContentSize().width, m_pPopupNode->getContentSize().height));
@@ -20,7 +20,7 @@ pCloseButton->setTag(11000);
 pCloseButton->addTouchEventListener(funcButtonEvent);
 ```
 
-해상도 문제 해결법
+#### 해상도 문제 해결법
 ``` cpp
 
 // no Border로 해상도 설정
@@ -51,7 +51,7 @@ Node* ResizeBorderNode()
 }
 ``` 
 
-rand()를 그냥 써서 랜덤한 값이 안나올경우 써야되는 함수...
+#### rand()를 그냥 써서 랜덤한 값이 안나올경우 써야되는 함수...
 ``` cpp
 // 
 
@@ -68,7 +68,7 @@ static_cast<float>(max)));
 }
 ``` 
 
-C++  시간 관련 처리 
+#### C++  시간 관련 처리 
 ``` cpp
 inline unsigned int GetNowTimeSec()
 {
@@ -87,7 +87,7 @@ inline uint64_t GetNowTimeMillSec()
 }
 ``` 
 
-URL 이미지 파일 이름 찾기 
+#### URL 이미지 파일 이름 찾기 
 ``` cpp
 inline void ImageUrlToFilename(const std::string strProfilePhotoURL, char *out, const int& out_size)
 {
@@ -120,6 +120,7 @@ inline const char* _format(const char* format, ...)
 }
 ``` 
 
+#### Spine
 ``` cpp
 // 스파인 로드 
 auto pBackStage = spine::SkeletonAnimation::createWithFile("apxsoft/spine/down_light_back.json", "apxsoft/spine/down_light_back.atlas");
@@ -140,7 +141,7 @@ m_pCenterImage->setCompleteListener([&](int trackIndex, int loopCount) {
 
 ``` 
 
-확장 가능한 스크롤 뷰 ( 미완성 )
+#### 확장 가능한 스크롤 뷰 ( 미완성 )
 ```cpp
 class ExpandableCustomListView : public ui::ScrollView //@ MyScrollView는 그냥 사용한 것... 적합한 이름으로 바꿀 것
 {
@@ -271,7 +272,7 @@ public:
 #define SCROLL_GAP		5
 ```
 
-// 웹 API 연결
+#### // 웹 API 연결
 ```cpp
 #pragma once
 
